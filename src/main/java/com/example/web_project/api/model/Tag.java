@@ -10,6 +10,7 @@ public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id_tag")
     private long id;
 
     @Column(name = "label")

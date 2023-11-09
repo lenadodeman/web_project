@@ -37,23 +37,23 @@ public class EventService {
     }
 
 
-    public void associateTag(final long idEvent, Tag tag)
-    {
-        eventRepository.findById(idEvent).ifPresent(event -> {
-            event.getTagsList().add(tag);
-        });
-
-    }
-
-    public void unlinkTag(final long idEvent, Tag tag)
-    {
-        Optional<Event> eventOptional = eventRepository.findById(idEvent);
-        if(eventOptional.isPresent()) {
-            Event event = eventOptional.get();
-            event.getTagsList().remove(tag); //Faut il mettre l'id du tag ou juste tag ?
-        }
-
-    }
+//    public void associateTag(final long idEvent, Tag tag)
+//    {
+//        eventRepository.findById(idEvent).ifPresent(event -> {
+//            event.getTagsList().add(tag);
+//        });
+//
+//    }
+//
+//    public void unlinkTag(final long idEvent, Tag tag)
+//    {
+//        Optional<Event> eventOptional = eventRepository.findById(idEvent);
+//        if(eventOptional.isPresent()) {
+//            Event event = eventOptional.get();
+//            event.getTagsList().remove(tag); //Faut il mettre l'id du tag ou juste tag ?
+//        }
+//
+//    }
 
 
 
