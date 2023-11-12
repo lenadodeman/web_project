@@ -31,26 +31,31 @@ public class Event {
     private String comment;
 
     @ManyToOne(
-            cascade = CascadeType.ALL)
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
     @JoinColumn(name = "id_serie")
     @JsonBackReference
     private Serie serie;
 
 
     @ManyToMany(
-//            fetch = FetchType.LAZY,
-            mappedBy = "events",
+            fetch = FetchType.LAZY,
+//            mappedBy = "events",
             cascade = {
                 CascadeType.PERSIST,
                 CascadeType.MERGE
             }
     )
-
+    @JoinTable (
+            name="Associate",
+            joinColumns = @JoinColumn(name = "id_event"),
+            inverseJoinColumns = @JoinColumn(name = "id_tag")
+    )
     @JsonIgnoreProperties("events")
     private List<Tag> tags = new ArrayList<>();
 
 
-
-
-    //Plusieurs events peuvent être rattachés à plusieurs Tags et plusieurs tags peuvent être rattachés à plusieurs event ?
 }

@@ -12,14 +12,16 @@ import java.util.Optional;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final TagService tagService;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, TagService tagService) {
         this.eventRepository = eventRepository;
+        this.tagService = tagService;
     }
 
-    public Event getEvent(final long eventId)
+    public Event getEvent(final long id_event)
     {
-        return eventRepository.findById(eventId).orElseThrow(IllegalArgumentException::new);
+        return eventRepository.findById(id_event).orElseThrow(IllegalArgumentException::new);
     }
 
     public Iterable<Event> getAllEvents()
@@ -33,33 +35,32 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(final long eventId)
+    public void deleteEvent(final long id_event)
     {
-        Event event = this.getEvent(eventId);
-        event.getTags().clear();
-        eventRepository.save(event);
-        eventRepository.flush();
-        eventRepository.deleteById(eventId);
+        eventRepository.deleteById(id_event);
     }
 
+    @Transactional
+    public void associateTagToEvent(final long id_event, final long id_tag)
+    {
+        Event event = this.getEvent(id_event);
+        Tag tag = tagService.getTag(id_tag);
 
-//    public void associateTag(final long idEvent, Tag tag)
-//    {
-//        eventRepository.findById(idEvent).ifPresent(event -> {
-//            event.getTagsList().add(tag);
-//        });
-//
-//    }
-//
-//    public void unlinkTag(final long idEvent, Tag tag)
-//    {
-//        Optional<Event> eventOptional = eventRepository.findById(idEvent);
-//        if(eventOptional.isPresent()) {
-//            Event event = eventOptional.get();
-//            event.getTagsList().remove(tag); //Faut il mettre l'id du tag ou juste tag ?
-//        }
-//
-//    }
+        event.getTags().add(tag);
+        tag.getEvents().add(event);
+
+    }
+
+    @Transactional
+    public void unlinkTagFromEvent(final long id_event, final long id_tag)
+    {
+        Event event = this.getEvent(id_event);
+        Tag tag = tagService.getTag(id_tag);
+
+        event.getTags().remove(tag);
+        tag.getEvents().remove(event);
+
+    }
 
 
 

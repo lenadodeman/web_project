@@ -41,6 +41,19 @@ public class EventController {
 
     }
 
+    @PostMapping("event/{id_event}/associateTagToEvent/{id_tag}")
+    public ResponseEntity<?> associateTagToEvent(@PathVariable long id_event, @PathVariable long id_tag) {
+        eventService.associateTagToEvent(id_event, id_tag);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("event/{id_event}/unlinkTagFromEvent/{id_tag}")
+    public ResponseEntity<?> unlinkTagFromEvent(@PathVariable long id_event, @PathVariable long id_tag) {
+        eventService.unlinkTagFromEvent(id_event, id_tag);
+        return ResponseEntity.ok().build();
+    }
+
+
 
 
 
