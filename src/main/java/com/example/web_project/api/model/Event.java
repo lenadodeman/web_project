@@ -1,6 +1,7 @@
 package com.example.web_project.api.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import lombok.Data;
@@ -34,6 +35,19 @@ public class Event {
     @JoinColumn(name = "id_serie")
     @JsonBackReference
     private Serie serie;
+
+
+    @ManyToMany(
+//            fetch = FetchType.LAZY,
+            mappedBy = "events",
+            cascade = {
+                CascadeType.PERSIST,
+                CascadeType.MERGE
+            }
+    )
+
+    @JsonIgnoreProperties("events")
+    private List<Tag> tags = new ArrayList<>();
 
 
 

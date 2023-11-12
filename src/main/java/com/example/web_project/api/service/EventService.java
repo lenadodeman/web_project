@@ -3,6 +3,7 @@ package com.example.web_project.api.service;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.EventRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -31,8 +32,13 @@ public class EventService {
         return eventRepository.save(event);
     }
 
+    @Transactional
     public void deleteEvent(final long eventId)
     {
+        Event event = this.getEvent(eventId);
+        event.getTags().clear();
+        eventRepository.save(event);
+        eventRepository.flush();
         eventRepository.deleteById(eventId);
     }
 

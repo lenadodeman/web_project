@@ -66,8 +66,8 @@ VALUES  ('nochevassu', 'noe', 'chevassus'),
         ('ledodeman', 'lena', 'dodeman');
 
 INSERT INTO Tags (label)
-VALUES ('Label1'),
-       ('Label2');
+VALUES ('Tag 1'),
+       ('Tag 2');
 
 INSERT INTO Associate (id_event, id_tag)
 VALUES (1, 1),
