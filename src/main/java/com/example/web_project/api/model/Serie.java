@@ -1,9 +1,11 @@
 package com.example.web_project.api.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -12,6 +14,7 @@ public class Serie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id_serie")
     private long id;
 
     @Column(name = "title")
@@ -20,7 +23,11 @@ public class Serie {
     @Column(name = "description")
     private String description;
 
-    @OneToMany
-    private ArrayList<Event> EventList;
+    @OneToMany(
+            mappedBy = "serie",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @JsonManagedReference
+    private List<Event> eventList = new ArrayList<>();
 
 }

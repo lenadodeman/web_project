@@ -22,4 +22,14 @@ public class SerieService {
     {
         return serieRepository.findAll();
     }
+
+    public Serie addSerie(Serie serie)
+    {
+        return serieRepository.save(serie);
+    }
+
+    public void deleteSerie(long id_serie)
+    {
+        serieRepository.deleteById(id_serie);
+    }
 }

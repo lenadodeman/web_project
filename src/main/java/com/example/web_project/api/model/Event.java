@@ -1,5 +1,7 @@
 package com.example.web_project.api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import lombok.Data;
@@ -17,6 +19,7 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id_event")
     private long id;
 
     @Column(name = "event_date")
@@ -27,15 +30,32 @@ public class Event {
     @Column(name = "comment")
     private String comment;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "serie")
+    @ManyToOne(
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
+    @JoinColumn(name = "id_serie")
+    @JsonBackReference
     private Serie serie;
 
 
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+//            mappedBy = "events",
+            cascade = {
+                CascadeType.PERSIST,
+                CascadeType.MERGE
+            }
+    )
+    @JoinTable (
+            name="Associate",
+            joinColumns = @JoinColumn(name = "id_event"),
+            inverseJoinColumns = @JoinColumn(name = "id_tag")
+    )
+    @JsonIgnoreProperties("events")
+    private List<Tag> tags = new ArrayList<>();
 
-    //@OneToMany
-    @Transient
-    private ArrayList<Tag> TagsList;
 
-    //Plusieurs events peuvent être rattachés à plusieurs Tags et plusieurs tags peuvent être rattachés à plusieurs produits ?
 }
