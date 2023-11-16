@@ -4,9 +4,9 @@ package com.example.web_project.api.service;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 public class TagService {
@@ -28,9 +28,21 @@ public class TagService {
         return tagRepository.findAll();
     }
 
+    public Tag addTag(Tag tag)
+    {
+        return tagRepository.save(tag);
+    }
+
     public void deleteTag(final long id_tag)
     {
         tagRepository.deleteById(id_tag);
+    }
+
+    @Transactional
+    public Tag updateTag(Tag updateTag)
+    {
+        updateTag.setLabel(updateTag.getLabel());
+        return tagRepository.save(updateTag);
     }
 
 

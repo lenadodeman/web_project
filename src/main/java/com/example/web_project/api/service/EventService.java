@@ -3,6 +3,7 @@ package com.example.web_project.api.service;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.EventRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class EventService {
 
     public Event getEvent(final long id_event)
     {
-        return eventRepository.findById(id_event).orElseThrow(IllegalArgumentException::new);
+        return eventRepository.findById(id_event).orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + id_event));
     }
 
     public Iterable<Event> getAllEvents()
@@ -34,7 +35,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    @Transactional
+
     public void deleteEvent(final long id_event)
     {
         eventRepository.deleteById(id_event);
@@ -45,7 +46,6 @@ public class EventService {
     {
         Event event = this.getEvent(id_event);
         Tag tag = tagService.getTag(id_tag);
-
         event.getTags().add(tag);
         tag.getEvents().add(event);
 
@@ -60,6 +60,15 @@ public class EventService {
         event.getTags().remove(tag);
         tag.getEvents().remove(event);
 
+    }
+
+    @Transactional
+    public Event updateEvent(Event updateEvent)
+    {
+        updateEvent.setDate(updateEvent.getDate());
+        updateEvent.setValueEvent(updateEvent.getValueEvent());
+        updateEvent.setComment(updateEvent.getComment());
+        return eventRepository.save(updateEvent);
     }
 
 

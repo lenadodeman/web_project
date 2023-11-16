@@ -4,12 +4,10 @@ import com.example.web_project.api.model.Serie;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.service.TagService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/tags")
 public class TagController {
 
     private final TagService tagService;
@@ -18,23 +16,35 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @GetMapping("/tag/{id_tag}")
+    @GetMapping("/{id_tag}")
     public Object getTimeSerie(@PathVariable("id_tag") long id_tag)
     {
         Tag tag = tagService.getTag(id_tag);
         return ResponseEntity.ok(tag);
     }
 
-    @GetMapping("/tags")
+    @GetMapping()
     public Iterable<Tag> getAllTags()
     {
         return tagService.getAllTags();
     }
 
-    @DeleteMapping("/deleteTag/{id_tag}")
+    @PostMapping()
+    public Tag addTag(@RequestBody Tag tag)
+    {
+        return tagService.addTag(tag);
+    }
+
+    @DeleteMapping("/{id_tag}")
     public void deleteTag(@PathVariable("id_tag") long id_tag)
     {
         tagService.deleteTag(id_tag);
 
+    }
+
+    @PostMapping("/update")
+    public Tag updateTag(@RequestBody Tag updateTag)
+    {
+        return tagService.updateTag(updateTag);
     }
 }
