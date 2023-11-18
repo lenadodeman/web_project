@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -24,5 +27,15 @@ public class User {
 
     @Column(name = "last_name", nullable = false, length = 30)
     private String lastName;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @JoinTable(
+            name="users_roles",
+            joinColumns={@JoinColumn(name="id_user", referencedColumnName="id_user")},
+            inverseJoinColumns={@JoinColumn(name="id_role", referencedColumnName="id_role")})
+    private List<Role> roles = new ArrayList<>();
 
 }

@@ -24,9 +24,10 @@ CREATE TABLE Events(
 
 CREATE TABLE Users(
                       id_user INT AUTO_INCREMENT,
-                      Login VARCHAR(50),
+                      login VARCHAR(50),
                       first_name VARCHAR(50),
                       last_name VARCHAR(50),
+                      password VARCHAR(50),
                       PRIMARY KEY(id_user)
 );
 
@@ -52,6 +53,12 @@ CREATE TABLE Has(
                     FOREIGN KEY(id_user) REFERENCES Users(id_user)
 );
 
+CREATE TABLE Roles(
+    id_role INT,
+    name VARCHAR(20),
+
+);
+
 INSERT INTO Series (title, description)
 VALUES ('TimeSeries 1', 'Description of the TimeSeries 1'),
        ('TimeSeries 2', 'Description of the TimeSeries 2');
@@ -61,9 +68,9 @@ VALUES ('2023-10-30', 20, 'Event 1 for the timeSeries 1', 1),
        ('2023-10-31', 10, 'Event 2 for the timeSeries 1', 1),
        ('2023-11-1', 100, 'Event 3 for the timeSeries2', 2);
 
-INSERT INTO Users (Login, first_name, last_name)
-VALUES  ('nochevassu', 'noe', 'chevassus'),
-        ('ledodeman', 'lena', 'dodeman');
+INSERT INTO Users (Login, first_name, last_name, password)
+VALUES  ('nochevassu', 'noe', 'chevassus','mdp1234'),
+        ('ledodeman', 'lena', 'dodeman', 'mdpmdp');
 
 INSERT INTO Tags (label)
 VALUES ('Tag 1'),
