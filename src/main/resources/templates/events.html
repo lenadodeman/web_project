@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Events</title>
+</head>
+<body>
+<h1>Events List</h1>
+<div th:each="event : ${events}">
+    <p th:text="${event.date}">Date</p>
+    <p th:text="${event.valueEvent}">Value of event</p>
+    <p th:text="${event.comment}">Comment</p>
+</div>
+</body>
+</html>
