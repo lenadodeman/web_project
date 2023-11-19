@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.hibernate.annotations.Cascade;
 
@@ -22,12 +26,17 @@ public class Event {
     @Column(name="id_event")
     private long id;
 
-    @Column(name = "event_date")
+    @NotBlank(message = "Date cannot be blank")
+    @Column(name = "event_date", nullable = false)
     private Date date;
-    @Column(name = "value_event")
-    private String valueEvent;
 
-    @Column(name = "comment")
+    @NotBlank(message = "Value event cannot be blank")
+    @Min(value = 0, message = "Value must be positive")
+    @Column(name = "value_event", nullable = false)
+    private int valueEvent;
+
+    @Size(max = 255, message = "Comment must be less than 255 characters")
+    @Column(name = "comment", length = 255)
     private String comment;
 
     @ManyToOne(

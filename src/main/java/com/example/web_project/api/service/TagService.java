@@ -30,6 +30,10 @@ public class TagService {
 
     public Tag addTag(Tag tag)
     {
+        if(tagRepository.existsById(tag.getId()) && tag.getId() != 0)
+        {
+            throw new IllegalStateException("Tag with id " + tag.getId() + " already exists");
+        }
         return tagRepository.save(tag);
     }
 
@@ -41,6 +45,10 @@ public class TagService {
     @Transactional
     public Tag updateTag(Tag updateTag)
     {
+        if(!tagRepository.existsById(updateTag.getId()))
+        {
+            throw new EntityNotFoundException("Tag not found with id: " + updateTag.getId());
+        }
         updateTag.setLabel(updateTag.getLabel());
         return tagRepository.save(updateTag);
     }

@@ -3,16 +3,20 @@ package com.example.web_project.api.controller;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.service.EventService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequestMapping("/events")
 public class EventController {
 
     private final EventService eventService;
 
+
     public EventController(EventService eventService) {
         this.eventService = eventService;
+
     }
 
 
@@ -24,9 +28,11 @@ public class EventController {
     }
 
     @GetMapping()
-    public Iterable<Event> getAllEvents()
+    public String getAllEvents(Model model)
     {
-        return eventService.getAllEvents();
+        Iterable<Event> events = eventService.getAllEvents();
+        model.addAttribute("events", events);
+        return "events";
     }
 
     @PostMapping()
@@ -53,7 +59,7 @@ public class EventController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public Event updateEvent(@RequestBody Event updateEvent)
     {
         return eventService.updateEvent(updateEvent);

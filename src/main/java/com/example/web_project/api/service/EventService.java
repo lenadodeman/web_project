@@ -32,6 +32,10 @@ public class EventService {
 
     public Event addEvent(Event event)
     {
+        if(eventRepository.existsById(event.getId()) && event.getId() != 0)
+        {
+            throw new IllegalStateException("Event with id " + event.getId() + " already exists");
+        }
         return eventRepository.save(event);
     }
 
@@ -65,6 +69,10 @@ public class EventService {
     @Transactional
     public Event updateEvent(Event updateEvent)
     {
+        if(!eventRepository.existsById(updateEvent.getId()))
+        {
+            throw new EntityNotFoundException("Event not found with id: " + updateEvent.getId());
+        }
         updateEvent.setDate(updateEvent.getDate());
         updateEvent.setValueEvent(updateEvent.getValueEvent());
         updateEvent.setComment(updateEvent.getComment());

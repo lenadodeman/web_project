@@ -42,7 +42,7 @@ public class TagController {
 
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public Tag updateTag(@RequestBody Tag updateTag)
     {
         return tagService.updateTag(updateTag);

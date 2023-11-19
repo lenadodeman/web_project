@@ -41,7 +41,7 @@ public class SerieController {
 
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<Serie> updateSerie(@RequestBody Serie updateSerie)
     {
         Serie serie =  serieService.updateSerie(updateSerie);

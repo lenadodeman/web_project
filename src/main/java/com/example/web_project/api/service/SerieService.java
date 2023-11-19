@@ -27,6 +27,10 @@ public class SerieService {
 
     public Serie addSerie(Serie serie)
     {
+        if(serieRepository.existsById(serie.getId()) && serie.getId() != 0)
+        {
+            throw new IllegalStateException("Serie with id " + serie.getId() + " already exists");
+        }
         return serieRepository.save(serie);
     }
 
@@ -38,6 +42,10 @@ public class SerieService {
     @Transactional
     public Serie updateSerie(Serie updateSerie)
     {
+        if(!serieRepository.existsById(updateSerie.getId()))
+        {
+            throw new EntityNotFoundException("Serie not found with id: " + updateSerie.getId());
+        }
         updateSerie.setTitle(updateSerie.getTitle());
         updateSerie.setDescription(updateSerie.getDescription());
         return serieRepository.save(updateSerie);
