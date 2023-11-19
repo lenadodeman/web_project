@@ -36,6 +36,10 @@ public class SerieService {
 
     public void deleteSerie(final long id_serie)
     {
+        if(!serieRepository.existsById(id_serie))
+        {
+            throw new IllegalStateException("Serie with id " + id_serie + " already exists");
+        }
         serieRepository.deleteById(id_serie);
     }
 

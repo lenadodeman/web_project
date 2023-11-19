@@ -42,6 +42,10 @@ public class EventService {
 
     public void deleteEvent(final long id_event)
     {
+        if(!eventRepository.existsById(id_event))
+        {
+            throw new EntityNotFoundException("Event not found with id: " + id_event);
+        }
         eventRepository.deleteById(id_event);
     }
 

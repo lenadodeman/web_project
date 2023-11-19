@@ -39,6 +39,10 @@ public class TagService {
 
     public void deleteTag(final long id_tag)
     {
+        if(!tagRepository.existsById(id_tag))
+        {
+            throw new EntityNotFoundException("Tag not found with id: " + id_tag);
+        }
         tagRepository.deleteById(id_tag);
     }
 
