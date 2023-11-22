@@ -2,6 +2,7 @@ package com.example.web_project.api.controller;
 
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.service.EventService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -26,11 +26,11 @@ public class Event {
     @Column(name="id_event")
     private long id;
 
-    @NotBlank(message = "Date cannot be blank")
+    @NotNull(message = "Date cannot be null")
     @Column(name = "event_date", nullable = false)
     private Date date;
 
-    @NotBlank(message = "Value event cannot be blank")
+    @NotNull(message = "Value event cannot be null")
     @Min(value = 0, message = "Value must be positive")
     @Column(name = "value_event", nullable = false)
     private int valueEvent;
