@@ -2,6 +2,7 @@ package com.example.web_project.api.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 
 import jakarta.validation.constraints.Min;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
 
 @Entity
 @Data
@@ -46,7 +48,8 @@ public class Event {
             }
     )
     @JoinColumn(name = "id_serie")
-    @JsonBackReference
+//    @JsonBackReference
+    @JsonSerialize
     private Serie serie;
 
 

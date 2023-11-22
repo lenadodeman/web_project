@@ -1,5 +1,7 @@
 package com.example.web_project.api.service;
 
+import com.example.web_project.api.dto.EventDTO;
+import com.example.web_project.api.mapper.EventMapper;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.EventRepository;
@@ -7,7 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class EventService {
@@ -15,28 +17,36 @@ public class EventService {
     private final EventRepository eventRepository;
     private final TagService tagService;
 
-    public EventService(EventRepository eventRepository, TagService tagService) {
+    private final SerieService serieService;
+    private final EventMapper eventMapper = EventMapper.INSTANCE;
+
+    public EventService(EventRepository eventRepository, TagService tagService, SerieService serieService) {
         this.eventRepository = eventRepository;
         this.tagService = tagService;
+        this.serieService = serieService;
     }
 
-    public Event getEvent(final long id_event)
+    public EventDTO getEvent(final long id_event)
     {
-        return eventRepository.findById(id_event).orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + id_event));
+        return eventMapper.eventToEventDTO(eventRepository.findById(id_event).orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + id_event)));
     }
 
-    public Iterable<Event> getAllEvents()
+    public List<EventDTO> getAllEvents()
     {
-        return eventRepository.findAll();
+        return eventMapper.eventsToEventsDTO(eventRepository.findAll());
     }
 
-    public Event addEvent(Event event)
+    public EventDTO addEvent(EventDTO eventDTO)
     {
+
+        Event event = eventMapper.eventDTOToEvent(eventDTO);
+        event.setSerie(serieService.getTimeSerie(eventDTO.getSerie().getId()));
         if(eventRepository.existsById(event.getId()) && event.getId() != 0)
         {
             throw new IllegalStateException("Event with id " + event.getId() + " already exists");
         }
-        return eventRepository.save(event);
+
+        return eventMapper.eventToEventDTO(eventRepository.save(event));
     }
 
 
@@ -52,7 +62,7 @@ public class EventService {
     @Transactional
     public void associateTagToEvent(final long id_event, final long id_tag)
     {
-        Event event = this.getEvent(id_event);
+        Event event = eventMapper.eventDTOToEvent(this.getEvent(id_event));
         Tag tag = tagService.getTag(id_tag);
         event.getTags().add(tag);
         tag.getEvents().add(event);
@@ -62,7 +72,7 @@ public class EventService {
     @Transactional
     public void unlinkTagFromEvent(final long id_event, final long id_tag)
     {
-        Event event = this.getEvent(id_event);
+        Event event = eventMapper.eventDTOToEvent(this.getEvent(id_event));
         Tag tag = tagService.getTag(id_tag);
 
         event.getTags().remove(tag);
@@ -71,8 +81,9 @@ public class EventService {
     }
 
     @Transactional
-    public Event updateEvent(Event updateEvent)
+    public EventDTO updateEvent(EventDTO event)
     {
+        Event updateEvent = eventMapper.eventDTOToEvent(event);
         if(!eventRepository.existsById(updateEvent.getId()))
         {
             throw new EntityNotFoundException("Event not found with id: " + updateEvent.getId());
@@ -80,7 +91,7 @@ public class EventService {
         updateEvent.setDate(updateEvent.getDate());
         updateEvent.setValueEvent(updateEvent.getValueEvent());
         updateEvent.setComment(updateEvent.getComment());
-        return eventRepository.save(updateEvent);
+        return eventMapper.eventToEventDTO(eventRepository.save(updateEvent));
     }
 
 

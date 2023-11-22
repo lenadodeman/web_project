@@ -1,5 +1,6 @@
 package com.example.web_project.service;
 
+import com.example.web_project.api.dto.EventDTO;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.EventRepository;

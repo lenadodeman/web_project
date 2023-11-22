@@ -7,6 +7,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class TagService {
@@ -23,7 +25,7 @@ public class TagService {
         return tagRepository.findById(id_tag).orElseThrow(() -> new EntityNotFoundException("Tag not found with id: " + id_tag));
     }
 
-    public Iterable<Tag> getAllTags()
+    public List<Tag> getAllTags()
     {
         return tagRepository.findAll();
     }
