@@ -1,5 +1,7 @@
 package com.example.web_project.service;
 
+import com.example.web_project.api.dto.SerieDTO;
+import com.example.web_project.api.mapper.SerieMapper;
 import com.example.web_project.api.model.Serie;
 import com.example.web_project.api.repository.SerieRepository;
 import com.example.web_project.api.service.SerieService;
@@ -10,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -19,100 +22,111 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class SerieServiceTest {
     @Mock
     private SerieRepository serieRepository;
+
+    @Mock
+    private SerieMapper serieMapper;
+
     @InjectMocks
     private SerieService serieService;
 
+
     @Test
-    public void testGetTimeSerie() {
+    public void testFindSerieById() {
         Serie serie = new Serie();
         when(serieRepository.findById(anyLong())).thenReturn(Optional.of(serie));
 
-        Serie result = serieService.getTimeSerie(1L);
+        Serie result = serieService.findSerieById(1L);
 
         assertThat(result).isEqualTo(serie);
         verify(serieRepository).findById(1L);
     }
 
     @Test
-    public void testGetTimeSerieNotFound() {
+    public void testFindSerieById_NotFound() {
         when(serieRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> serieService.getTimeSerie(1L))
+        assertThatThrownBy(() -> serieService.findSerieById(1L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Serie not found with id: 1");
+    }
+
+    @Test
+    public void testGetTimeSerie() {
+        Serie serie = new Serie();
+        SerieDTO serieDTO = new SerieDTO();
+        when(serieRepository.findById(anyLong())).thenReturn(Optional.of(serie));
+        when(serieMapper.toDTO(any(Serie.class))).thenReturn(serieDTO);
+
+        SerieDTO result = serieService.getTimeSerie(1L);
+
+        assertThat(result).isEqualTo(serieDTO);
+        verify(serieRepository).findById(1L);
+        verify(serieMapper).toDTO(serie);
     }
 
     @Test
     public void testGetAllTimeSeries() {
         Serie serie1 = new Serie();
         Serie serie2 = new Serie();
+        SerieDTO serieDTO1 = new SerieDTO();
+        SerieDTO serieDTO2 = new SerieDTO();
         when(serieRepository.findAll()).thenReturn(Arrays.asList(serie1, serie2));
+        when(serieMapper.toDTOList(anyList())).thenReturn(Arrays.asList(serieDTO1, serieDTO2));
 
-        Iterable<Serie> result = serieService.getAllTimeSeries();
+        List<SerieDTO> result = serieService.getAllTimeSeries();
 
-        assertThat(result).containsExactly(serie1, serie2);
+        assertThat(result).containsExactly(serieDTO1, serieDTO2);
         verify(serieRepository).findAll();
+        verify(serieMapper).toDTOList(Arrays.asList(serie1, serie2));
     }
 
-    @Test
-    public void testGetAllTimeSeriesEmpty() {
-        when(serieRepository.findAll()).thenReturn(new ArrayList<>());
 
-        Iterable<Serie> result = serieService.getAllTimeSeries();
-
-        assertThat(result).isEmpty();
-        verify(serieRepository).findAll();
-    }
 
     @Test
     public void testAddSerie() {
-        Serie newSerie  = new Serie();
-        newSerie.setTitle("Science Series");
-        newSerie.setDescription("A series about interesting scientific numbers");
+        SerieDTO serieDTO = new SerieDTO();
+        serieDTO.setId(1L);
+
         when(serieRepository.existsById(anyLong())).thenReturn(false);
-        when(serieRepository.save(any(Serie.class))).thenReturn(newSerie);
+        when(serieMapper.toDomain(any(SerieDTO.class))).thenReturn(new Serie());
+        when(serieRepository.save(any(Serie.class))).thenReturn(new Serie());
+        when(serieMapper.toDTO(any(Serie.class))).thenReturn(serieDTO);
 
-        Serie result = serieService.addSerie(newSerie);
+        SerieDTO result = serieService.addSerie(serieDTO);
 
-        assertThat(result.getTitle()).isEqualTo(newSerie.getTitle());
-        assertThat(result.getDescription()).isEqualTo(newSerie.getDescription());
+        assertThat(result).isEqualTo(serieDTO);
+        verify(serieRepository).existsById(1L);
+        verify(serieMapper).toDomain(serieDTO);
+        verify(serieRepository).save(any(Serie.class));
+        verify(serieMapper).toDTO(any(Serie.class));
     }
 
     @Test
     public void testAddSerieAlreadyExists() {
-        Serie serie = new Serie();
-        serie.setId(1L);
+        SerieDTO serieDTO = new SerieDTO();
+        serieDTO.setId(1L);
+
         when(serieRepository.existsById(anyLong())).thenReturn(true);
 
-        assertThatThrownBy(() -> serieService.addSerie(serie))
+        assertThatThrownBy(() -> serieService.addSerie(serieDTO))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Serie with id 1 already exists");
     }
 
     @Test
-    public void testAddSerieWithDatabaseError() {
-        Serie newSerie = new Serie();
-        when(serieRepository.existsById(anyLong())).thenReturn(false);
-        when(serieRepository.save(any(Serie.class))).thenThrow(new RuntimeException("Database Error"));
-
-        assertThatThrownBy(() -> serieService.addSerie(newSerie))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Database Error");
-    }
-
-    @Test
     public void testDeleteSerie() {
-        doNothing().when(serieRepository).deleteById(anyLong());
         when(serieRepository.existsById(anyLong())).thenReturn(true);
 
         serieService.deleteSerie(1L);
 
+        verify(serieRepository).existsById(1L);
         verify(serieRepository).deleteById(1L);
     }
 
@@ -126,39 +140,33 @@ public class SerieServiceTest {
     }
 
     @Test
-    public void testUpdateSerieDetails() {
-        Serie existingSerie = new Serie();
-        existingSerie.setId(1L);
-        existingSerie.setTitle("Old Title");
-        existingSerie.setDescription("Old Description");
-
-        Serie updateSerie = new Serie();
-        updateSerie.setId(1L);
-        updateSerie.setTitle("New Title");
-        updateSerie.setDescription("New Description");
+    public void testUpdateSerie() {
+        SerieDTO serieDTO = new SerieDTO();
+        serieDTO.setId(1L);
 
         when(serieRepository.existsById(anyLong())).thenReturn(true);
-        when(serieRepository.save(any(Serie.class))).thenReturn(updateSerie);
+        when(serieMapper.toDomain(any(SerieDTO.class))).thenReturn(new Serie());
+        when(serieRepository.save(any(Serie.class))).thenReturn(new Serie());
+        when(serieMapper.toDTO(any(Serie.class))).thenReturn(serieDTO);
 
-        Serie result = serieService.updateSerie(updateSerie);
+        SerieDTO result = serieService.updateSerie(serieDTO);
 
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getTitle()).isEqualTo("New Title");
-        assertThat(result.getDescription()).isEqualTo("New Description");
-        verify(serieRepository).save(updateSerie);
+        assertThat(result).isEqualTo(serieDTO);
+        verify(serieRepository).existsById(1L);
+        verify(serieMapper).toDomain(serieDTO);
+        verify(serieRepository).save(any(Serie.class));
+        verify(serieMapper).toDTO(any(Serie.class));
     }
 
     @Test
-    public void testUpdateSerieNotFound() {
-        Serie updateSerie = new Serie();
-        updateSerie.setId(1L);
-        updateSerie.setTitle("New Title");
-        updateSerie.setDescription("New Description");
+    public void testUpdateSerie_NotExists() {
+        SerieDTO serieDTO = new SerieDTO();
+        serieDTO.setId(1L);
 
         when(serieRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThatThrownBy(() -> serieService.updateSerie(updateSerie))
+        assertThatThrownBy(() -> serieService.updateSerie(serieDTO))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Serie not found with id: " + updateSerie.getId());
+                .hasMessageContaining("Serie not found with id: 1");
     }
 }

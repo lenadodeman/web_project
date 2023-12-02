@@ -1,8 +1,10 @@
 package com.example.web_project.api.controller;
 
+import com.example.web_project.api.dto.TagDTO;
 import com.example.web_project.api.model.Serie;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.service.TagService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,35 +20,38 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @GetMapping("/{id_tag}")
-    public Object getTimeSerie(@PathVariable("id_tag") long id_tag)
+    @GetMapping("/{tagId}")
+    public ResponseEntity<TagDTO> getTag(@PathVariable long tagId)
     {
-        Tag tag = tagService.getTag(id_tag);
-        return ResponseEntity.ok(tag);
+        TagDTO tagDTO = tagService.getTag(tagId);
+        return new ResponseEntity<>(tagDTO, HttpStatus.OK);
     }
 
     @GetMapping()
-    public List<Tag> getAllTags()
+    public ResponseEntity<List<TagDTO>> getAllTags()
     {
-        return tagService.getAllTags();
+        List<TagDTO> foundTags = tagService.getAllTags();
+        return new ResponseEntity<>(foundTags, HttpStatus.OK);
     }
 
     @PostMapping()
-    public Tag addTag(@RequestBody Tag tag)
+    public ResponseEntity<TagDTO> addTag(@RequestBody TagDTO tagDTO)
     {
-        return tagService.addTag(tag);
+        TagDTO addedTag = tagService.addTag(tagDTO);
+        return new ResponseEntity<>(addedTag, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id_tag}")
-    public void deleteTag(@PathVariable("id_tag") long id_tag)
+    @DeleteMapping("/{tagId}")
+    public ResponseEntity<HttpStatus> deleteTag(@PathVariable long tagId)
     {
-        tagService.deleteTag(id_tag);
-
+        tagService.deleteTag(tagId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public Tag updateTag(@RequestBody Tag updateTag)
+    public ResponseEntity<TagDTO> updateTag(@RequestBody TagDTO tagDTO)
     {
-        return tagService.updateTag(updateTag);
+        TagDTO updatedTag = tagService.updateTag(tagDTO);
+        return new ResponseEntity<>(updatedTag, HttpStatus.OK);
     }
 }

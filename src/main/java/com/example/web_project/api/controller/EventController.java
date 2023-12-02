@@ -18,7 +18,6 @@ public class EventController {
 
     private final EventService eventService;
 
-    private final EventMapper eventMapper = EventMapper.INSTANCE;
 
     public EventController(EventService eventService) {
         this.eventService = eventService;
@@ -67,10 +66,11 @@ public class EventController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/update")
-    public EventDTO updateEvent(@RequestBody EventDTO updateEvent)
+    @PutMapping
+    public ResponseEntity<EventDTO> updateEvent(@RequestBody EventDTO updateEvent)
     {
-        return eventService.updateEvent(updateEvent);
+        EventDTO updatedEvent = eventService.updateEvent(updateEvent);
+        return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
     }
 
 

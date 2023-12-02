@@ -1,57 +1,74 @@
 package com.example.web_project.api.service;
 
+import com.example.web_project.api.dto.SerieDTO;
+import com.example.web_project.api.mapper.SerieMapper;
 import com.example.web_project.api.model.Serie;
 import com.example.web_project.api.repository.SerieRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SerieService {
 
     private final SerieRepository serieRepository;
 
+    private final SerieMapper serieMapper = SerieMapper.INSTANCE;
+
     public SerieService(SerieRepository serieRepository) {
         this.serieRepository = serieRepository;
     }
 
-    public Serie getTimeSerie(final long id_serie)
+    public Serie findSerieById(final long serieId)
     {
-        return serieRepository.findById(id_serie).orElseThrow(() -> new EntityNotFoundException("Serie not found with id: " + id_serie));
+        return serieRepository.findById(serieId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Serie not found with id: " + serieId)
+                );
     }
 
-    public Iterable<Serie> getAllTimeSeries()
-    {
-        return serieRepository.findAll();
+    public SerieDTO getTimeSerie(long serieId){
+        return serieMapper.toDTO(findSerieById(serieId));
     }
 
-    public Serie addSerie(Serie serie)
+    public List<SerieDTO> getAllTimeSeries()
     {
-        if(serieRepository.existsById(serie.getId()) && serie.getId() != 0)
+        return serieMapper.toDTOList(serieRepository.findAll());
+    }
+
+    public SerieDTO addSerie(SerieDTO serieDTO)
+    {
+        if(serieRepository.existsById(serieDTO.getId()))
         {
-            throw new IllegalStateException("Serie with id " + serie.getId() + " already exists");
+            throw new IllegalStateException("Serie with id " + serieDTO.getId() + " already exists");
         }
-        return serieRepository.save(serie);
+
+        Serie serieToAdd = serieMapper.toDomain(serieDTO);
+
+        return serieMapper.toDTO(serieRepository.save(serieToAdd));
     }
 
-    public void deleteSerie(final long id_serie)
+    public void deleteSerie(final long serieId)
     {
-        if(!serieRepository.existsById(id_serie))
+        if(!serieRepository.existsById(serieId))
         {
-            throw new IllegalStateException("Serie with id " + id_serie + " already exists");
+            throw new IllegalStateException("Serie with id " + serieId + " already exists");
         }
-        serieRepository.deleteById(id_serie);
+        serieRepository.deleteById(serieId);
     }
 
     @Transactional
-    public Serie updateSerie(Serie updateSerie)
+    public SerieDTO updateSerie(SerieDTO SerieDTO)
     {
-        if(!serieRepository.existsById(updateSerie.getId()))
+        if(!serieRepository.existsById(SerieDTO.getId()))
         {
-            throw new EntityNotFoundException("Serie not found with id: " + updateSerie.getId());
+            throw new EntityNotFoundException("Serie not found with id: " + SerieDTO.getId());
         }
-        updateSerie.setTitle(updateSerie.getTitle());
-        updateSerie.setDescription(updateSerie.getDescription());
-        return serieRepository.save(updateSerie);
+
+        Serie serieToUpdate = serieMapper.toDomain(SerieDTO);
+
+        return serieMapper.toDTO(serieRepository.save(serieToUpdate));
     }
 }

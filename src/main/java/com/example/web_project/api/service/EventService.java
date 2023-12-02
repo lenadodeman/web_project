@@ -18,80 +18,105 @@ public class EventService {
     private final TagService tagService;
 
     private final SerieService serieService;
-    private final EventMapper eventMapper = EventMapper.INSTANCE;
 
-    public EventService(EventRepository eventRepository, TagService tagService, SerieService serieService) {
+    private final EventMapper eventMapper;
+
+    public EventService(EventRepository eventRepository, TagService tagService, SerieService serieService, EventMapper eventMapper) {
         this.eventRepository = eventRepository;
         this.tagService = tagService;
         this.serieService = serieService;
+        this.eventMapper = eventMapper;
     }
 
-    public EventDTO getEvent(final long id_event)
+    public Event findEventById(final long eventId)
     {
-        return eventMapper.eventToEventDTO(eventRepository.findById(id_event).orElseThrow(() -> new EntityNotFoundException("Event not found with id: " + id_event)));
+        return eventRepository.findById(eventId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Event not found with id: " + eventId)
+                );
+    }
+
+    public EventDTO getEvent(long eventId){
+        return eventMapper.toDTO(findEventById(eventId));
     }
 
     public List<EventDTO> getAllEvents()
     {
-        return eventMapper.eventsToEventsDTO(eventRepository.findAll());
+        List<Event> eventList = eventRepository.findAll();
+        return eventMapper.toDTOList(eventList);
     }
 
     public EventDTO addEvent(EventDTO eventDTO)
     {
-
-        Event event = eventMapper.eventDTOToEvent(eventDTO);
-        event.setSerie(serieService.getTimeSerie(eventDTO.getSerie().getId()));
-        if(eventRepository.existsById(event.getId()) && event.getId() != 0)
+        //Test de l'existence de l'event
+        if(eventRepository.existsById(eventDTO.getId()))
         {
-            throw new IllegalStateException("Event with id " + event.getId() + " already exists");
+            throw new IllegalStateException("Event with id " + eventDTO.getId() + " already exists");
         }
 
-        return eventMapper.eventToEventDTO(eventRepository.save(event));
+        //Mapping de l'event en objet de type domain
+        Event event = eventMapper.toDomain(eventDTO);
+        event.setSerie(serieService.findSerieById(eventDTO.getSerie().getId()));
+
+        //Sauvegarde de l'event
+        event = eventRepository.save(event);
+
+        return eventMapper.toDTO(event);
     }
 
 
-    public void deleteEvent(final long id_event)
+    public void deleteEvent(final long eventId)
     {
-        if(!eventRepository.existsById(id_event))
+
+        if(!eventRepository.existsById(eventId))
         {
-            throw new EntityNotFoundException("Event not found with id: " + id_event);
+            throw new EntityNotFoundException("Event not found with id: " + eventId);
         }
-        eventRepository.deleteById(id_event);
+
+        Event event = this.findEventById(eventId);
+        for (Tag tag : event.getTags()) {
+            tag.getEvents().remove(event);
+        }
+        event.getTags().clear();
+        eventRepository.save(event);
+        eventRepository.deleteById(eventId);
+    }
+
+    @Transactional
+    public EventDTO updateEvent(EventDTO eventDTO)
+    {
+        //Test de l'existence de l'event
+        if(!eventRepository.existsById(eventDTO.getId()))
+        {
+            throw new EntityNotFoundException("Event not found with id: " + eventDTO.getId());
+        }
+        //Mapping en objet de type domain
+        Event updateEvent = eventMapper.toDomain(eventDTO);
+
+        //Mise à jour de l'event
+        return eventMapper.toDTO(eventRepository.save(updateEvent));
     }
 
     @Transactional
     public void associateTagToEvent(final long id_event, final long id_tag)
     {
-        Event event = eventMapper.eventDTOToEvent(this.getEvent(id_event));
-        Tag tag = tagService.getTag(id_tag);
+
+        Event event = this.findEventById(id_event);
+
+        Tag tag = tagService.findTagById(id_tag);
+
         event.getTags().add(tag);
         tag.getEvents().add(event);
-
     }
 
     @Transactional
     public void unlinkTagFromEvent(final long id_event, final long id_tag)
     {
-        Event event = eventMapper.eventDTOToEvent(this.getEvent(id_event));
-        Tag tag = tagService.getTag(id_tag);
+        Event event = this.findEventById(id_event);
+        Tag tag = tagService.findTagById(id_tag);
 
         event.getTags().remove(tag);
         tag.getEvents().remove(event);
-
-    }
-
-    @Transactional
-    public EventDTO updateEvent(EventDTO event)
-    {
-        Event updateEvent = eventMapper.eventDTOToEvent(event);
-        if(!eventRepository.existsById(updateEvent.getId()))
-        {
-            throw new EntityNotFoundException("Event not found with id: " + updateEvent.getId());
-        }
-        updateEvent.setDate(updateEvent.getDate());
-        updateEvent.setValueEvent(updateEvent.getValueEvent());
-        updateEvent.setComment(updateEvent.getComment());
-        return eventMapper.eventToEventDTO(eventRepository.save(updateEvent));
     }
 
 

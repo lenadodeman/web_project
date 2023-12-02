@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 import org.hibernate.annotations.Cascade;
 
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import java.util.List;
 
 
 @Entity
-@Data
 @Table(name = "Events")
 public class Event {
 
@@ -48,26 +46,68 @@ public class Event {
             }
     )
     @JoinColumn(name = "id_serie")
-//    @JsonBackReference
-    @JsonSerialize
+    @JsonBackReference
     private Serie serie;
 
 
     @ManyToMany(
-            fetch = FetchType.LAZY,
-//            mappedBy = "events",
+            mappedBy = "events",
             cascade = {
-                CascadeType.PERSIST,
-                CascadeType.MERGE
-            }
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            fetch = FetchType.EAGER
     )
-    @JoinTable (
-            name="Associate",
-            joinColumns = @JoinColumn(name = "id_event"),
-            inverseJoinColumns = @JoinColumn(name = "id_tag")
-    )
-    @JsonIgnoreProperties("events")
-    private List<Tag> tags = new ArrayList<>();
+    private List<Tag> tags;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public int getValueEvent() {
+        return valueEvent;
+    }
+
+    public void setValueEvent(int valueEvent) {
+        this.valueEvent = valueEvent;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public Serie getSerie() {
+        return serie;
+    }
+
+    public void setSerie(Serie serie) {
+        this.serie = serie;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
 
 
 }

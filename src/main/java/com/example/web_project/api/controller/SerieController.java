@@ -1,10 +1,14 @@
 package com.example.web_project.api.controller;
 
+import com.example.web_project.api.dto.SerieDTO;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.model.Serie;
 import com.example.web_project.api.service.SerieService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/series")
@@ -17,34 +21,36 @@ public class SerieController {
     }
 
     @GetMapping("/{id_serie}")
-    public ResponseEntity<Serie> getTimeSerie(@PathVariable("id_serie") long id_serie)
+    public ResponseEntity<SerieDTO> getTimeSerie(@PathVariable long serieId)
     {
-        Serie timeSerie = serieService.getTimeSerie(id_serie);
-        return ResponseEntity.ok(timeSerie);
+        SerieDTO foundSerie = serieService.getTimeSerie(serieId);
+        return new ResponseEntity<>(foundSerie, HttpStatus.OK);
     }
 
     @GetMapping()
-    public Iterable<Serie> getAllTimesSeries()
+    public ResponseEntity<List<SerieDTO>> getAllTimesSeries()
     {
-        return serieService.getAllTimeSeries();
+        List<SerieDTO> foundSeries = serieService.getAllTimeSeries();
+        return new ResponseEntity<>(foundSeries, HttpStatus.OK);
     }
 
     @PostMapping()
-    public Serie addEvent(@RequestBody Serie serie)
+    public ResponseEntity<SerieDTO> addSerie(@RequestBody SerieDTO serieDTO)
     {
-        return serieService.addSerie(serie);
+        SerieDTO addedSerie = serieService.addSerie(serieDTO);
+        return new ResponseEntity<>(addedSerie, HttpStatus.CREATED);
     }
-    @DeleteMapping("/{id_serie}")
-    public void deleteEvent(@PathVariable("id_serie") long id_serie)
+    @DeleteMapping("/{serieId}")
+    public ResponseEntity<HttpStatus> deleteSerie(@PathVariable long serieId)
     {
-        serieService.deleteSerie(id_serie);
-
+        serieService.deleteSerie(serieId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Serie> updateSerie(@RequestBody Serie updateSerie)
+    @PutMapping()
+    public ResponseEntity<SerieDTO> updateSerie(@RequestBody SerieDTO serieDTO)
     {
-        Serie serie =  serieService.updateSerie(updateSerie);
-        return ResponseEntity.ok(serie);
+        SerieDTO updatedSerie = serieService.updateSerie(serieDTO);
+        return new ResponseEntity<>(updatedSerie, HttpStatus.OK);
     }
 }

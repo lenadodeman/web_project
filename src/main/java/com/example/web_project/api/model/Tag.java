@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "Tags")
 public class Tag {
 
@@ -32,14 +30,31 @@ public class Tag {
 
         }
     )
-    @JoinTable (
-            name="Associate",
-            joinColumns = @JoinColumn(name = "id_tag"),
-            inverseJoinColumns = @JoinColumn(name = "id_event")
+    private List<Event> events;
 
-    )
-    @JsonIgnoreProperties("tags")
-    private List<Event> events = new ArrayList<>();
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
 
 
 }
