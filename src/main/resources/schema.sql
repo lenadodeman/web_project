@@ -1,15 +1,15 @@
 DROP TABLE IF EXISTS Series;
 DROP TABLE IF EXISTS Events;
-DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS dbUsers;
 DROP TABLE IF EXISTS Tags;
 DROP TABLE IF EXISTS Associate;
 DROP TABLE IF EXISTS Has;
 
 CREATE TABLE Series(
-                           id_serie INT AUTO_INCREMENT,
-                           title VARCHAR(50),
-                           description VARCHAR(50),
-                           PRIMARY KEY(id_serie)
+                       id_serie INT AUTO_INCREMENT,
+                       title VARCHAR(50),
+                       description VARCHAR(50),
+                       PRIMARY KEY(id_serie)
 );
 
 CREATE TABLE Events(
@@ -22,13 +22,11 @@ CREATE TABLE Events(
                        FOREIGN KEY(id_serie) REFERENCES Series(id_serie)
 );
 
-CREATE TABLE Users(
-                      id_user INT AUTO_INCREMENT,
-                      login VARCHAR(50),
-                      first_name VARCHAR(50),
-                      last_name VARCHAR(50),
-                      password VARCHAR(50),
-                      PRIMARY KEY(id_user)
+CREATE TABLE dbUsers(
+                      id_user INT AUTO_INCREMENT PRIMARY KEY,
+                      username VARCHAR(50) NOT NULL,
+                      password VARCHAR(250) NOT NULL,
+                      role VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Tags(
@@ -50,13 +48,7 @@ CREATE TABLE Has(
                     id_user INT,
                     PRIMARY KEY(id_serie, id_user),
                     FOREIGN KEY(id_serie) REFERENCES Series(id_serie),
-                    FOREIGN KEY(id_user) REFERENCES Users(id_user)
-);
-
-CREATE TABLE Roles(
-    id_role INT,
-    name VARCHAR(20),
-
+                    FOREIGN KEY(id_user) REFERENCES dbUsers(id_user)
 );
 
 INSERT INTO Series (title, description)
@@ -68,9 +60,9 @@ VALUES ('2023-10-30', 20, 'Event 1 for the timeSeries 1', 1),
        ('2023-10-31', 10, 'Event 2 for the timeSeries 1', 1),
        ('2023-11-1', 100, 'Event 3 for the timeSeries2', 2);
 
-INSERT INTO Users (Login, first_name, last_name, password)
-VALUES  ('nochevassu', 'noe', 'chevassus','mdp1234'),
-        ('ledodeman', 'lena', 'dodeman', 'mdpmdp');
+INSERT INTO dbUsers (username, password, role)
+VALUES  ('dbuser','$2y$10$.qkbukzzX21D.bqbI.B2R.tvWP90o/Y16QRWVLodw51BHft7ZWbc.','USER'),
+        ('dbadmin','$2y$10$kp1V7UYDEWn17WSK16UcmOnFd1mPFVF6UkLrOOCGtf24HOYt8p1iC','ADMIN');
 
 INSERT INTO Tags (label)
 VALUES ('Tag 1'),
