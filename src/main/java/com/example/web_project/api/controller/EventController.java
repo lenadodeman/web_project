@@ -1,12 +1,16 @@
 package com.example.web_project.api.controller;
 
+import com.example.web_project.api.dto.EventDTO;
+import com.example.web_project.api.mapper.EventMapper;
 import com.example.web_project.api.model.Event;
 import com.example.web_project.api.service.EventService;
-import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/events")
@@ -22,30 +26,32 @@ public class EventController {
 
 
     @GetMapping("/{id_event}")
-    public Object getEvent(@PathVariable("id_event") long id_event)
+    public ResponseEntity<EventDTO> getEvent(@PathVariable("id_event") long id_event)
     {
-        Event event = eventService.getEvent(id_event);
-        return ResponseEntity.ok(event);
+        EventDTO eventDTO = eventService.getEvent(id_event);
+        return ResponseEntity.ok(eventDTO);
     }
 
     @GetMapping()
     public String getAllEvents(Model model)
     {
-        Iterable<Event> events = eventService.getAllEvents();
+        List<EventDTO> events = eventService.getAllEvents();
         model.addAttribute("events", events);
         return "events";
     }
 
     @PostMapping()
-    public Event addEvent(@RequestBody Event event)
+    public EventDTO addEvent(@RequestBody EventDTO eventDTO)
     {
-        return eventService.addEvent(event);
+        return eventService.addEvent(eventDTO);
     }
 
     @DeleteMapping("/{id_event}")
-    public void deleteEvent(@PathVariable("id_event") long id_event)
+    public ResponseEntity<HttpStatus> deleteEvent(@PathVariable("id_event") long id_event)
     {
         eventService.deleteEvent(id_event);
+        return new ResponseEntity<>(HttpStatus.OK);
+
     }
 
     @PostMapping("/{id_event}/associateTagToEvent/{id_tag}")
@@ -60,10 +66,11 @@ public class EventController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/update")
-    public Event updateEvent(@RequestBody Event updateEvent)
+    @PutMapping
+    public ResponseEntity<EventDTO> updateEvent(@RequestBody EventDTO updateEvent)
     {
-        return eventService.updateEvent(updateEvent);
+        EventDTO updatedEvent = eventService.updateEvent(updateEvent);
+        return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
     }
 
 

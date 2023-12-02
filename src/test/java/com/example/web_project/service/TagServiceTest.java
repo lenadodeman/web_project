@@ -1,6 +1,8 @@
 package com.example.web_project.service;
 
 
+import com.example.web_project.api.dto.TagDTO;
+import com.example.web_project.api.mapper.TagMapper;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.TagRepository;
 import com.example.web_project.api.service.TagService;
@@ -19,28 +21,57 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class TagServiceTest {
     @Mock
     private TagRepository tagRepository;
+
+    @Mock
+    private TagMapper tagMapper;
+
     @InjectMocks
     private TagService tagService;
 
+
     @Test
-    public void testGetTag() {
+    public void testFindTagById() {
         Tag tag = new Tag();
         when(tagRepository.findById(anyLong())).thenReturn(Optional.of(tag));
 
-        Tag result = tagService.getTag(1L);
+        Tag result = tagService.findTagById(1L);
 
         assertThat(result).isEqualTo(tag);
         verify(tagRepository).findById(1L);
     }
 
     @Test
-    public void testGetTagNotFound() {
+    public void testFindTagById_NotFound() {
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> tagService.findTagById(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Tag not found with id: 1");
+    }
+
+    @Test
+    public void testGetTag() {
+        Tag tag = new Tag();
+        TagDTO tagDTO = new TagDTO();
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(tag));
+        when(tagMapper.toDTO(any(Tag.class))).thenReturn(tagDTO);
+
+        TagDTO result = tagService.getTag(1L);
+
+        assertThat(result).isEqualTo(tagDTO);
+        verify(tagRepository).findById(1L);
+        verify(tagMapper).toDTO(tag);
+    }
+
+    @Test
+    public void testGetTag_NotFound() {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> tagService.getTag(1L))
@@ -52,65 +83,75 @@ public class TagServiceTest {
     public void testGetAllTags() {
         Tag tag1 = new Tag();
         Tag tag2 = new Tag();
+        TagDTO tagDTO1 = new TagDTO();
+        TagDTO tagDTO2 = new TagDTO();
         when(tagRepository.findAll()).thenReturn(Arrays.asList(tag1, tag2));
+        when(tagMapper.toDTOList(anyList())).thenReturn(Arrays.asList(tagDTO1, tagDTO2));
 
-        Iterable<Tag> result = tagService.getAllTags();
+        List<TagDTO> result = tagService.getAllTags();
 
-        assertThat(result).containsExactly(tag1, tag2);
+        assertThat(result).containsExactly(tagDTO1, tagDTO2);
         verify(tagRepository).findAll();
+        verify(tagMapper).toDTOList(Arrays.asList(tag1, tag2));
     }
 
     @Test
     public void testGetAllTagsEmpty() {
-        when(tagRepository.findAll()).thenReturn(new ArrayList<>());
+        when(tagRepository.findAll()).thenReturn(Arrays.asList());
+        when(tagMapper.toDTOList(anyList())).thenReturn(Arrays.asList());
 
-        Iterable<Tag> result = tagService.getAllTags();
+        List<TagDTO> result = tagService.getAllTags();
 
         assertThat(result).isEmpty();
         verify(tagRepository).findAll();
+        verify(tagMapper).toDTOList(Arrays.asList());
     }
 
     @Test
     public void testAddTag() {
-        Tag newTag  = new Tag();
-        newTag.setLabel("Science");
+        TagDTO tagDTO = new TagDTO();
+        tagDTO.setId(1L);
+
+        Tag tag = new Tag();
+
         when(tagRepository.existsById(anyLong())).thenReturn(false);
-        when(tagRepository.save(any(Tag.class))).thenReturn(newTag);
+        when(tagMapper.toDomain(any(TagDTO.class))).thenReturn(tag);
+        when(tagRepository.save(any(Tag.class))).thenReturn(tag);
+        when(tagMapper.toDTO(any(Tag.class))).thenReturn(tagDTO);
 
-        Tag result = tagService.addTag(newTag);
+        TagDTO result = tagService.addTag(tagDTO);
 
-        assertThat(result.getLabel()).isEqualTo(newTag.getLabel());
+        assertThat(result).isEqualTo(tagDTO);
+        verify(tagRepository).existsById(tagDTO.getId());
+        verify(tagMapper).toDomain(tagDTO);
+        verify(tagRepository).save(tag);
+        verify(tagMapper).toDTO(tag);
     }
 
     @Test
     public void testAddTagAlreadyExists() {
-        Tag tag = new Tag();
-        tag.setId(1L);
+        TagDTO tagDTO = new TagDTO();
+        tagDTO.setId(1L);
+
         when(tagRepository.existsById(anyLong())).thenReturn(true);
 
-        assertThatThrownBy(() -> tagService.addTag(tag))
+        assertThatThrownBy(() -> tagService.addTag(tagDTO))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Tag with id 1 already exists");
-    }
-
-    @Test
-    public void testAddTagWithDatabaseError() {
-        Tag newTag = new Tag();
-        when(tagRepository.existsById(anyLong())).thenReturn(false);
-        when(tagRepository.save(any(Tag.class))).thenThrow(new RuntimeException("Database Error"));
-
-        assertThatThrownBy(() -> tagService.addTag(newTag))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Database Error");
+                .hasMessageContaining("Tag with id " + tagDTO.getId() + " already exists");
     }
 
     @Test
     public void testDeleteTag() {
-        doNothing().when(tagRepository).deleteById(anyLong());
+        Tag tag = new Tag();
+
         when(tagRepository.existsById(anyLong())).thenReturn(true);
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(tag));
 
         tagService.deleteTag(1L);
 
+        verify(tagRepository).existsById(1L);
+        verify(tagRepository).findById(1L);
+        verify(tagRepository).save(tag);
         verify(tagRepository).deleteById(1L);
     }
 
@@ -124,36 +165,42 @@ public class TagServiceTest {
     }
 
     @Test
-    public void testUpdateTagDetails() {
-        Tag existingTag = new Tag();
-        existingTag.setId(1L);
-        existingTag.setLabel("Old Label");
+    public void testUpdateTag() {
+        TagDTO tagDTO = new TagDTO();
+        tagDTO.setId(1L);
+        tagDTO.setLabel("New Label");
 
-        Tag updateTag = new Tag();
-        updateTag.setId(1L);
-        updateTag.setLabel("New Label");
+        Tag tag = new Tag();
+        tag.setId(1L);
+        tag.setLabel(tagDTO.getLabel());
 
-        when(tagRepository.existsById(anyLong())).thenReturn(true);
-        when(tagRepository.save(any(Tag.class))).thenReturn(updateTag);
+        when(tagRepository.existsById(tagDTO.getId())).thenReturn(true);
+        when(tagMapper.toDomain(tagDTO)).thenReturn(tag);
+        when(tagRepository.save(tag)).thenReturn(tag);
+        when(tagMapper.toDTO(tag)).thenReturn(tagDTO);
 
-        Tag result = tagService.updateTag(updateTag);
+        TagDTO result = tagService.updateTag(tagDTO);
 
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getLabel()).isEqualTo("New Label");
-        verify(tagRepository).save(updateTag);
+        assertThat(result).isEqualTo(tagDTO);
+        verify(tagRepository).existsById(tagDTO.getId());
+        verify(tagMapper).toDomain(tagDTO);
+        verify(tagRepository).save(tag);
+        verify(tagMapper).toDTO(tag);
     }
 
     @Test
-    public void testUpdateTagNotFound() {
-        Tag updateTag = new Tag();
-        updateTag.setId(1L);
-        updateTag.setLabel("New Label");
+    public void testUpdateTag_NotExists() {
+        TagDTO tagDTO = new TagDTO();
+        tagDTO.setId(1L);
+        tagDTO.setLabel("New Label");
 
-        when(tagRepository.existsById(anyLong())).thenReturn(false);
+        when(tagRepository.existsById(tagDTO.getId())).thenReturn(false);
 
-        assertThatThrownBy(() -> tagService.updateTag(updateTag))
+        assertThatThrownBy(() -> tagService.updateTag(tagDTO))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Tag not found with id: " + updateTag.getId());
+                .hasMessage("Tag not found with id: " + tagDTO.getId());
+
+        verify(tagRepository).existsById(tagDTO.getId());
     }
 
 

@@ -5,13 +5,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "Series")
 public class Serie {
 
@@ -32,9 +30,40 @@ public class Serie {
 
     @OneToMany(
             mappedBy = "serie",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    @JsonManagedReference
-    private List<Event> eventList = new ArrayList<>();
+            cascade = CascadeType.ALL
+    )
+    private List<Event> eventList;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<Event> getEventList() {
+        return eventList;
+    }
+
+    public void setEventList(List<Event> eventList) {
+        this.eventList = eventList;
+    }
 
 }

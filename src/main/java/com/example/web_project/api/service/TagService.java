@@ -1,60 +1,77 @@
 package com.example.web_project.api.service;
 
 
+import com.example.web_project.api.dto.TagDTO;
+import com.example.web_project.api.mapper.TagMapper;
 import com.example.web_project.api.model.Tag;
 import com.example.web_project.api.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class TagService {
 
     private final TagRepository tagRepository;
+    private final TagMapper tagMapper = TagMapper.INSTANCE;
 
     public TagService(TagRepository tagRepository)
     {
         this.tagRepository = tagRepository;
     }
 
-    public Tag getTag(final long id_tag)
+    public Tag findTagById(final long tagId)
     {
-        return tagRepository.findById(id_tag).orElseThrow(() -> new EntityNotFoundException("Tag not found with id: " + id_tag));
+        return tagRepository.findById(tagId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Tag not found with id: " + tagId)
+                );
     }
 
-    public Iterable<Tag> getAllTags()
-    {
-        return tagRepository.findAll();
+    public TagDTO getTag(long tagId){
+        return tagMapper.toDTO(findTagById(tagId));
     }
 
-    public Tag addTag(Tag tag)
+    public List<TagDTO> getAllTags()
     {
-        if(tagRepository.existsById(tag.getId()) && tag.getId() != 0)
+        return tagMapper.toDTOList(tagRepository.findAll());
+    }
+
+    public TagDTO addTag(TagDTO tagDTO)
+    {
+        if(tagRepository.existsById(tagDTO.getId()))
         {
-            throw new IllegalStateException("Tag with id " + tag.getId() + " already exists");
+            throw new IllegalStateException("Tag with id " + tagDTO.getId() + " already exists");
         }
-        return tagRepository.save(tag);
+
+        Tag tagTOUpdate = tagMapper.toDomain(tagDTO);
+
+        return tagMapper.toDTO(tagRepository.save(tagTOUpdate));
     }
 
-    public void deleteTag(final long id_tag)
+    public void deleteTag(final long tagId)
     {
-        if(!tagRepository.existsById(id_tag))
+        if(!tagRepository.existsById(tagId))
         {
-            throw new EntityNotFoundException("Tag not found with id: " + id_tag);
+            throw new EntityNotFoundException("Tag not found with id: " + tagId);
         }
-        tagRepository.deleteById(id_tag);
+        tagRepository.deleteById(tagId);
     }
 
     @Transactional
-    public Tag updateTag(Tag updateTag)
+    public TagDTO updateTag(TagDTO tagDTO)
     {
-        if(!tagRepository.existsById(updateTag.getId()))
+        if(!tagRepository.existsById(tagDTO.getId()))
         {
-            throw new EntityNotFoundException("Tag not found with id: " + updateTag.getId());
+            throw new EntityNotFoundException("Tag not found with id: " + tagDTO.getId());
         }
-        updateTag.setLabel(updateTag.getLabel());
-        return tagRepository.save(updateTag);
+
+        Tag tagToUpdate = tagMapper.toDomain(tagDTO);
+
+        return tagMapper.toDTO(tagRepository.save(tagToUpdate));
     }
 
 

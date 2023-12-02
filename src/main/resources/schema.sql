@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS Series;
 DROP TABLE IF EXISTS Events;
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Tags;
-DROP TABLE IF EXISTS Associate;
-DROP TABLE IF EXISTS Has;
+-- DROP TABLE IF EXISTS Associate;
+-- DROP TABLE IF EXISTS Has;
 
 CREATE TABLE Series(
                            id_serie INT AUTO_INCREMENT,
@@ -36,21 +36,21 @@ CREATE TABLE Tags(
                      PRIMARY KEY(id_tag)
 );
 
-CREATE TABLE Associate(
-                          id_event INT,
-                          id_tag INT,
-                          PRIMARY KEY(id_event, id_tag),
-                          FOREIGN KEY(id_event) REFERENCES Events(id_event),
-                          FOREIGN KEY(id_tag) REFERENCES Tags(id_tag)
-);
-
-CREATE TABLE Has(
-                    id_serie INT,
-                    id_user INT,
-                    PRIMARY KEY(id_serie, id_user),
-                    FOREIGN KEY(id_serie) REFERENCES Series(id_serie),
-                    FOREIGN KEY(id_user) REFERENCES Users(id_user)
-);
+-- CREATE TABLE Associate(
+--                           id_event INT,
+--                           id_tag INT,
+--                           PRIMARY KEY(id_event, id_tag),
+--                           FOREIGN KEY(id_event) REFERENCES Events(id_event),
+--                           FOREIGN KEY(id_tag) REFERENCES Tags(id_tag)
+-- );
+--
+-- CREATE TABLE Has(
+--                     id_serie INT,
+--                     id_user INT,
+--                     PRIMARY KEY(id_serie, id_user),
+--                     FOREIGN KEY(id_serie) REFERENCES Series(id_serie),
+--                     FOREIGN KEY(id_user) REFERENCES Users(id_user)
+-- );
 
 INSERT INTO Series (title, description)
 VALUES ('TimeSeries 1', 'Description of the TimeSeries 1'),
@@ -69,17 +69,17 @@ INSERT INTO Tags (label)
 VALUES ('Tag 1'),
        ('Tag 2');
 
-INSERT INTO Associate (id_event, id_tag)
-VALUES (1, 1),
-       (1, 2),
-       (2, 2),
-       (3, 2);
-
-
-INSERT INTO Has (id_serie, id_user)
-VALUES (1, 1),
-       (1, 2),
-       (2, 2);
+-- INSERT INTO Associate (id_event, id_tag)
+-- VALUES (1, 1),
+--        (1, 2),
+--        (2, 2),
+--        (3, 2);
+--
+--
+-- INSERT INTO Has (id_serie, id_user)
+-- VALUES (1, 1),
+--        (1, 2),
+--        (2, 2);
 
 
 
