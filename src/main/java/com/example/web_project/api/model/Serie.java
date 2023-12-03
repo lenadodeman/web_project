@@ -34,6 +34,15 @@ public class Serie {
     )
     private List<Event> eventList;
 
+    @ManyToMany(
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+
+            }
+    )
+    private List<User> users;
+
     public long getId() {
         return id;
     }

@@ -46,17 +46,21 @@ public class Event {
             }
     )
     @JoinColumn(name = "id_serie")
-    @JsonBackReference
     private Serie serie;
 
 
     @ManyToMany(
-            mappedBy = "events",
+//            mappedBy = "events",
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             },
             fetch = FetchType.EAGER
+    )
+    @JoinTable (
+            name="tags_events",
+            joinColumns = @JoinColumn(name = "id_event"),
+            inverseJoinColumns = @JoinColumn(name = "id_tag")
     )
     private List<Tag> tags;
 

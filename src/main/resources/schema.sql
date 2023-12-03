@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS Series;
 DROP TABLE IF EXISTS Events;
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Tags;
--- DROP TABLE IF EXISTS Associate;
+DROP TABLE IF EXISTS tags_events;
 -- DROP TABLE IF EXISTS Has;
 
 CREATE TABLE Series(
@@ -24,9 +24,9 @@ CREATE TABLE Events(
 
 CREATE TABLE Users(
                       id_user INT AUTO_INCREMENT,
-                      Login VARCHAR(50),
-                      first_name VARCHAR(50),
-                      last_name VARCHAR(50),
+                      username VARCHAR(250),
+                      password VARCHAR(250),
+                      role VARCHAR(50),
                       PRIMARY KEY(id_user)
 );
 
@@ -36,13 +36,13 @@ CREATE TABLE Tags(
                      PRIMARY KEY(id_tag)
 );
 
--- CREATE TABLE Associate(
---                           id_event INT,
---                           id_tag INT,
---                           PRIMARY KEY(id_event, id_tag),
---                           FOREIGN KEY(id_event) REFERENCES Events(id_event),
---                           FOREIGN KEY(id_tag) REFERENCES Tags(id_tag)
--- );
+CREATE TABLE tags_events(
+                          id_event INT,
+                          id_tag INT,
+                          PRIMARY KEY(id_event, id_tag),
+                          FOREIGN KEY(id_event) REFERENCES Events(id_event),
+                          FOREIGN KEY(id_tag) REFERENCES Tags(id_tag)
+);
 --
 -- CREATE TABLE Has(
 --                     id_serie INT,
@@ -61,19 +61,19 @@ VALUES ('2023-10-30', 20, 'Event 1 for the timeSeries 1', 1),
        ('2023-10-31', 10, 'Event 2 for the timeSeries 1', 1),
        ('2023-11-1', 100, 'Event 3 for the timeSeries2', 2);
 
-INSERT INTO Users (Login, first_name, last_name)
-VALUES  ('nochevassu', 'noe', 'chevassus'),
-        ('ledodeman', 'lena', 'dodeman');
+INSERT INTO Users (username, password, role)
+VALUES ('user', '$2y$10$.qkbukzzX21D.bqbI.B2R.tvWP90o/Y16QRWVLodw51BHft7ZWbc.', 'USER'),
+       ('admin', '$2y$10$kp1V7UYDEWn17WSK16UcmOnFd1mPFVF6UkLrOOCGtf24HOYt8p1iC', 'ADMIN');
 
 INSERT INTO Tags (label)
 VALUES ('Tag 1'),
        ('Tag 2');
 
--- INSERT INTO Associate (id_event, id_tag)
--- VALUES (1, 1),
---        (1, 2),
---        (2, 2),
---        (3, 2);
+INSERT INTO tags_events (id_event, id_tag)
+VALUES (1, 1),
+       (1, 2),
+       (2, 2),
+       (3, 2);
 --
 --
 -- INSERT INTO Has (id_serie, id_user)
