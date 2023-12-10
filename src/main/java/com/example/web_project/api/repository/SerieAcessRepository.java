@@ -12,5 +12,5 @@ public interface SerieAcessRepository extends JpaRepository<SerieAccess, Long> {
 
     Optional<SerieAccess> findBySerieIdAndUserId(Long serieId, Long userId);
 
-//    List<SerieAccess> findByUserId(Long userId);
+    List<SerieAccess> findByUserId(Long userId);
 }

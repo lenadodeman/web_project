@@ -3,10 +3,12 @@ package com.example.web_project.api.controller;
 import com.example.web_project.api.dto.SerieAcessDTO;
 import com.example.web_project.api.dto.SerieDTO;
 import com.example.web_project.api.service.SerieService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -19,44 +21,43 @@ public class SerieController {
         this.serieService = timeSerieService;
     }
 
-    @GetMapping("/{id_serie}")
+    @GetMapping("/{serieId}")
     public ResponseEntity<SerieDTO> getTimeSerie(@PathVariable long serieId)
     {
         SerieDTO foundSerie = serieService.getTimeSerie(serieId);
         return new ResponseEntity<>(foundSerie, HttpStatus.OK);
     }
 
-    @GetMapping()
-    public ResponseEntity<List<SerieDTO>> getAllTimesSeries()
-    {
-        List<SerieDTO> foundSeries = serieService.getAllTimeSeries();
-        return new ResponseEntity<>(foundSeries, HttpStatus.OK);
-    }
-
 //    @GetMapping()
-//    public ResponseEntity<List<SerieDTO>> getSeriesByCurrentUserId()
+//    public ResponseEntity<List<SerieDTO>> getAllTimesSeries()
 //    {
-//        List<SerieDTO> foundSeries = serieService.getSeriesByCurrentUserId();
+//        List<SerieDTO> foundSeries = serieService.getAllTimeSeries();
+//
 //        return new ResponseEntity<>(foundSeries, HttpStatus.OK);
 //    }
 
+    @GetMapping()
+    public ResponseEntity<List<SerieDTO>> getSeriesByCurrentUserId()
+    {
+        List<SerieDTO> foundSeries = serieService.getSeriesByCurrentUserId();
+        return new ResponseEntity<>(foundSeries, HttpStatus.OK);
+    }
+
 
     @PostMapping()
-    public ResponseEntity<SerieDTO> addSerie(@RequestBody SerieDTO serieDTO)
+    public ResponseEntity<SerieDTO> addSerie(@Valid @RequestBody SerieDTO serieDTO)
     {
         SerieDTO addedSerie = serieService.addSerie(serieDTO);
         return new ResponseEntity<>(addedSerie, HttpStatus.CREATED);
     }
     @DeleteMapping("/{serieId}")
-    public ResponseEntity<HttpStatus> deleteSerie(@PathVariable long serieId)
-    {
+    public ResponseEntity<HttpStatus> deleteSerie(@PathVariable long serieId) throws AccessDeniedException {
         serieService.deleteSerie(serieId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping()
-    public ResponseEntity<SerieDTO> updateSerie(@RequestBody SerieDTO serieDTO)
-    {
+    public ResponseEntity<SerieDTO> updateSerie(@RequestBody SerieDTO serieDTO) throws AccessDeniedException {
         SerieDTO updatedSerie = serieService.updateSerie(serieDTO);
         return new ResponseEntity<>(updatedSerie, HttpStatus.OK);
     }

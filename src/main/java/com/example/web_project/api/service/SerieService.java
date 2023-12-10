@@ -1,7 +1,9 @@
 package com.example.web_project.api.service;
 
+import com.example.web_project.api.dto.EventDTO;
 import com.example.web_project.api.dto.SerieAcessDTO;
 import com.example.web_project.api.dto.SerieDTO;
+import com.example.web_project.api.mapper.EventMapper;
 import com.example.web_project.api.mapper.SerieAcessMapper;
 import com.example.web_project.api.mapper.SerieMapper;
 import com.example.web_project.api.model.Serie;
@@ -12,8 +14,10 @@ import com.example.web_project.api.repository.SerieRepository;
 import com.example.web_project.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,12 +31,14 @@ public class SerieService {
     private final SerieAcessMapper serieAcessMapper = SerieAcessMapper.INSTANCE;
     private final SerieAcessRepository serieAccessRepository;
 
+    private final EventMapper eventMapper;
     private final UserService userService;
 
     private final UserRepository userRepository;
-    public SerieService(SerieRepository serieRepository, SerieAcessRepository serieAcessRepository, UserService userService, UserRepository userRepository) {
+    public SerieService(SerieRepository serieRepository, SerieAcessRepository serieAcessRepository, EventMapper eventMapper, UserService userService, UserRepository userRepository) {
         this.serieRepository = serieRepository;
         this.serieAccessRepository = serieAcessRepository;
+        this.eventMapper = eventMapper;
         this.userService = userService;
         this.userRepository = userRepository;
     }
@@ -51,18 +57,29 @@ public class SerieService {
 
     public List<SerieDTO> getAllTimeSeries()
     {
-        return serieMapper.toDTOList(serieRepository.findAll());
+        List<Serie> series = serieRepository.findAll();
+        return series.stream().map(this::mapSerieWithEvents).collect(Collectors.toList());
     }
 
-//    public List<SerieDTO> getSeriesByCurrentUserId()
-//    {
-//        Long userId = userService.getCurrentUserId();
-//        List<SerieAccess> serieAccesses = serieAccessRepository.findByUserId(userId);
-//        List<Serie> series = serieAccesses.stream()
-//                .map(SerieAccess::getSerie)
-//                .collect(Collectors.toList());
-//        return serieMapper.toDTOList(series);
-//    }
+    private SerieDTO mapSerieWithEvents(Serie serie) {
+        SerieDTO serieDTO = serieMapper.toDTO(serie);
+
+
+        List<EventDTO> eventDTOs = eventMapper.toDTOList(serie.getEventList());
+        serieDTO.setEventList(eventDTOs);
+
+        return serieDTO;
+    }
+
+    public List<SerieDTO> getSeriesByCurrentUserId()
+    {
+        Long userId = userService.getCurrentUserId();
+        List<SerieAccess> serieAccesses = serieAccessRepository.findByUserId(userId);
+        List<Serie> series = serieAccesses.stream()
+                .map(SerieAccess::getSerie)
+                .collect(Collectors.toList());
+        return series.stream().map(this::mapSerieWithEvents).collect(Collectors.toList());
+    }
 
     public SerieDTO addSerie(SerieDTO serieDTO)
     {
@@ -88,8 +105,16 @@ public class SerieService {
         return serieMapper.toDTO(savedSerie);
     }
 
-    public void deleteSerie(final long serieId)
-    {
+    public void deleteSerie(final long serieId) throws AccessDeniedException {
+        Long userId = userService.getCurrentUserId();
+        SerieDTO serieDTO = getTimeSerie(serieId);
+        SerieAccess access = serieAccessRepository.findBySerieIdAndUserId(serieDTO.getId(), userId)
+                .orElseThrow(() -> new AccessDeniedException("No access to this serie"));
+
+        if (!access.getAccessType().equals("WRITE")) {
+            throw new AccessDeniedException("Insufficient permissions");
+        }
+
         if(!serieRepository.existsById(serieId))
         {
             throw new IllegalStateException("Serie with id " + serieId + " already exists");
@@ -98,22 +123,36 @@ public class SerieService {
     }
 
     @Transactional
-    public SerieDTO updateSerie(SerieDTO SerieDTO)
-    {
-        if(!serieRepository.existsById(SerieDTO.getId()))
-        {
-            throw new EntityNotFoundException("Serie not found with id: " + SerieDTO.getId());
+    public SerieDTO updateSerie(SerieDTO serieDTO) throws AccessDeniedException {
+
+        Long userId = userService.getCurrentUserId();
+        SerieAccess access = serieAccessRepository.findBySerieIdAndUserId(serieDTO.getId(), userId)
+                .orElseThrow(() -> new AccessDeniedException("No access to this serie"));
+
+        if (!access.getAccessType().equals("WRITE")) {
+            throw new AccessDeniedException("Insufficient permissions");
         }
 
-        Serie serieToUpdate = serieMapper.toDomain(SerieDTO);
+        if(!serieRepository.existsById(serieDTO.getId()))
+        {
+            throw new EntityNotFoundException("Serie not found with id: " + serieDTO.getId());
+        }
+
+        Serie serieToUpdate = serieMapper.toDomain(serieDTO);
 
         return serieMapper.toDTO(serieRepository.save(serieToUpdate));
     }
 
     public SerieAcessDTO shareSerieWithUser(SerieAcessDTO serieAcessDTO) {
         long id_user = serieAcessDTO.getUser().getId();
+        long id_serie = serieAcessDTO.getSerie().getId();
 
         Serie serie = findSerieById(serieAcessDTO.getSerie().getId());
+
+        boolean alreadyShared = serieAccessRepository.findBySerieIdAndUserId(id_serie, id_user).isPresent();
+        if (alreadyShared) {
+            throw new IllegalStateException("Serie already shared with this user");
+        }
 
         User user = userRepository.findById(id_user)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id_user));

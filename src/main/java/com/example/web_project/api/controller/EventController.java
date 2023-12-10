@@ -1,8 +1,6 @@
 package com.example.web_project.api.controller;
 
 import com.example.web_project.api.dto.EventDTO;
-import com.example.web_project.api.mapper.EventMapper;
-import com.example.web_project.api.model.Event;
 import com.example.web_project.api.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Controller
@@ -41,9 +40,9 @@ public class EventController {
     }
 
     @PostMapping()
-    public EventDTO addEvent(@RequestBody EventDTO eventDTO)
-    {
-        return eventService.addEvent(eventDTO);
+    public ResponseEntity<EventDTO> addEvent(@RequestBody EventDTO eventDTO) throws AccessDeniedException {
+        EventDTO addedEvent = eventService.addEvent(eventDTO);
+        return new ResponseEntity<>(addedEvent, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id_event}")

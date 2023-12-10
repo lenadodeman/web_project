@@ -15,6 +15,7 @@ public interface EventMapper {
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
 
     @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "serie", ignore = true)
     EventDTO toDTO(Event event);
     Event toDomain(EventDTO eventDTO);
 
