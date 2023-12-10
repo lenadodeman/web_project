@@ -18,32 +18,27 @@ public class TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper = TagMapper.INSTANCE;
 
-    public TagService(TagRepository tagRepository)
-    {
+    public TagService(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
     }
 
-    public Tag findTagById(final long tagId)
-    {
+    public Tag findTagById(final long tagId) {
         return tagRepository.findById(tagId)
                 .orElseThrow(
                         () -> new EntityNotFoundException("Tag not found with id: " + tagId)
                 );
     }
 
-    public TagDTO getTag(long tagId){
+    public TagDTO getTag(long tagId) {
         return tagMapper.toDTO(findTagById(tagId));
     }
 
-    public List<TagDTO> getAllTags()
-    {
+    public List<TagDTO> getAllTags() {
         return tagMapper.toDTOList(tagRepository.findAll());
     }
 
-    public TagDTO addTag(TagDTO tagDTO)
-    {
-        if(tagRepository.existsById(tagDTO.getId()))
-        {
+    public TagDTO addTag(TagDTO tagDTO) {
+        if (tagRepository.existsById(tagDTO.getId())) {
             throw new IllegalStateException("Tag with id " + tagDTO.getId() + " already exists");
         }
 
@@ -52,20 +47,16 @@ public class TagService {
         return tagMapper.toDTO(tagRepository.save(tagTOUpdate));
     }
 
-    public void deleteTag(final long tagId)
-    {
-        if(!tagRepository.existsById(tagId))
-        {
+    public void deleteTag(final long tagId) {
+        if (!tagRepository.existsById(tagId)) {
             throw new EntityNotFoundException("Tag not found with id: " + tagId);
         }
         tagRepository.deleteById(tagId);
     }
 
     @Transactional
-    public TagDTO updateTag(TagDTO tagDTO)
-    {
-        if(!tagRepository.existsById(tagDTO.getId()))
-        {
+    public TagDTO updateTag(TagDTO tagDTO) {
+        if (!tagRepository.existsById(tagDTO.getId())) {
             throw new EntityNotFoundException("Tag not found with id: " + tagDTO.getId());
         }
 
@@ -73,7 +64,6 @@ public class TagService {
 
         return tagMapper.toDTO(tagRepository.save(tagToUpdate));
     }
-
 
 
 }

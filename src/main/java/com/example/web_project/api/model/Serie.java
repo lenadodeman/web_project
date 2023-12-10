@@ -15,7 +15,7 @@ public class Serie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id_serie")
+    @Column(name = "id_serie")
     private long id;
 
     @NotBlank(message = "Title cannot blank")
@@ -28,10 +28,7 @@ public class Serie {
     @Column(name = "description", nullable = false, length = 255)
     private String description;
 
-    @OneToMany(
-            mappedBy = "serie",
-            cascade = CascadeType.ALL
-    )
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL)
     private List<Event> eventList;
 
     @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL)

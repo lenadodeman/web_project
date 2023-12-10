@@ -14,7 +14,6 @@ import com.example.web_project.api.repository.SerieRepository;
 import com.example.web_project.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
