@@ -34,14 +34,8 @@ public class Serie {
     )
     private List<Event> eventList;
 
-    @ManyToMany(
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-
-            }
-    )
-    private List<User> users;
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL)
+    private List<SerieAccess> seriesAccesses;
 
     public long getId() {
         return id;

@@ -19,13 +19,12 @@ public class EventService {
 
     private final SerieService serieService;
 
-    private final EventMapper eventMapper;
+    private final EventMapper eventMapper = EventMapper.INSTANCE;
 
-    public EventService(EventRepository eventRepository, TagService tagService, SerieService serieService, EventMapper eventMapper) {
+    public EventService(EventRepository eventRepository, TagService tagService, SerieService serieService) {
         this.eventRepository = eventRepository;
         this.tagService = tagService;
         this.serieService = serieService;
-        this.eventMapper = eventMapper;
     }
 
     public Event findEventById(final long eventId)

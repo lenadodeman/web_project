@@ -14,7 +14,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id_user")
-    private Long id_user;
+    private Long id;
 
     @NotBlank(message = "Username cannot be blank")
     @Size(max = 30, message = "Username length must be less than 30 characters")
@@ -22,28 +22,24 @@ public class User {
     private String username;
 
     @NotBlank(message = "Password name cannot be blank")
-    @Size(max = 50, message = "Password name length must be less than 50 characters")
+    @Size(max = 400, message = "Password name length must be less than 400 characters")
     @Column(name = "password", nullable = false, length = 50)
     private String password;
 
     private String role;
 
-    @ManyToMany(
-            mappedBy = "users",
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            fetch = FetchType.EAGER
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL
     )
-    private List<Serie> series;
+    private List<SerieAccess> serieAccesses;
 
-    public Long getId_user() {
-        return id_user;
+    public Long getId() {
+        return id;
     }
 
-    public void setId_user(Long id_user) {
-        this.id_user = id_user;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -69,5 +65,17 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public List<SerieAccess> getSerieAccesses() {
+        return serieAccesses;
+    }
+
+    public void setSerieAccesses(List<SerieAccess> serieAccesses) {
+        this.serieAccesses = serieAccesses;
+    }
+
+
+
+
 
 }
